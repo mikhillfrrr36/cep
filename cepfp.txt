@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Market Price Tracker</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header>
+    <h1>🌾 Market Price Tracker</h1>
+    <select id="language-select">
+      <option value="en">English</option>
+      <option value="hi">हिंदी</option>
+      <option value="mr">मराठी</option>
+    </select>
+    <button id="login-btn">Sign Up / Login</button>
+  </header>
+
+  <section class="content">
+    <div class="sidebar">
+      <h3 id="nearby">Nearby Mandi:</h3>
+      <select id="mandi">
+        <option>Local Mandi</option>
+        <option>Delhi</option>
+        <option>Pune</option>
+        <option>Lucknow</option>
+      </select>
+
+      <ul id="crop-list">
+        <li data-crop="Wheat">🌾 Wheat</li>
+        <li data-crop="Rice">🍚 Rice</li>
+        <li data-crop="Maize">🌽 Maize</li>
+        <li data-crop="Sugarcane">🍬 Sugarcane</li>
+        <li data-crop="Mustard">🌻 Mustard</li>
+      </ul>
+    </div>
+
+    <div class="main">
+      <h2 id="crop-title">Select a crop to view price trend</h2>
+      <canvas id="priceChart"></canvas>
+    </div>
+  </section>
+
+  <!-- Login / Signup Popup -->
+  <div id="login-popup" class="popup hidden">
+    <div class="popup-content">
+      <h3>Sign Up / Login</h3>
+      <input type="text" id="name" placeholder="Name" />
+      <input type="text" id="phone" placeholder="Phone / Email" />
+      <input type="password" id="password" placeholder="Password" />
+      <button id="create-account">Create Account</button>
+      <button id="close-popup">Close</button>
+      <p class="note">Demo only — data stored locally.</p>
+    </div>
+  </div>
+
+  <script>
+    // Initialize chart
+    const ctx = document.getElementById('priceChart').getContext('2d');
+    let priceChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        datasets: [{
+          label: 'Price (₹)',
+          data: [1200, 1350, 1280, 1400, 1320, 1450],
+          borderColor: '#2a8f3c',
+          backgroundColor: 'rgba(42, 143, 60, 0.1)',
+          tension: 0.3,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: false,
+            grid: {
+              color: 'rgba(0, 0, 0, 0.05)'
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            }
+          }
+        }
+      }
+    });
+
+    // Crop selection
+    const cropList = document.querySelectorAll('#crop-list li');
+    const cropTitle = document.getElementById('crop-title');
+
+    cropList.forEach(crop => {
+      crop.addEventListener('click', () => {
+        // Remove active class from all crops
+        cropList.forEach(c => c.classList.remove('active'));
+        
+        // Add active class to clicked crop
+        crop.classList.add('active');
+        
+        // Update title
+        const cropName = crop.getAttribute('data-crop');
+        cropTitle.textContent = `${cropName} Price Trend`;
+        
+        // Update chart with sample data
+        updateChart(cropName);
+      });
+    });
+
+    // Function to update chart with different data
+    function updateChart(crop) {
+      let prices = [];
+      
+      switch(crop) {
+        case 'Wheat':
+          prices = [1200, 1350, 1280, 1400, 1320, 1450];
+          break;
+        case 'Rice':
+          prices = [1800, 1750, 1850, 1900, 1820, 1950];
+          break;
+        case 'Maize':
+          prices = [1500, 1450, 1550, 1600, 1520, 1650];
+          break;
+        case 'Sugarcane':
+          prices = [2200, 2100, 2300, 2400, 2250, 2500];
+          break;
+        case 'Mustard':
+          prices = [3200, 3100, 3300, 3400, 3250, 3500];
+          break;
+        default:
+          prices = [1200, 1350, 1280, 1400, 1320, 1450];
+      }
+      
+      priceChart.data.datasets[0].data = prices;
+      priceChart.update();
+    }
+
+    // Login popup functionality
+    const loginBtn = document.getElementById('login-btn');
+    const loginPopup = document.getElementById('login-popup');
+    const closePopup = document.getElementById('close-popup');
+    const createAccount = document.getElementById('create-account');
+
+    loginBtn.addEventListener('click', () => {
+      loginPopup.classList.remove('hidden');
+    });
+
+    closePopup.addEventListener('click', () => {
+      loginPopup.classList.add('hidden');
+    });
+
+    createAccount.addEventListener('click', () => {
+      const name = document.getElementById('name').value;
+      const phone = document.getElementById('phone').value;
+      const password = document.getElementById('password').value;
+      
+      if(name && phone && password) {
+        alert(`Welcome ${name}! Account created successfully.`);
+        loginPopup.classList.add('hidden');
+        // Clear form
+        document.getElementById('name').value = '';
+        document.getElementById('phone').value = '';
+        document.getElementById('password').value = '';
+      } else {
+        alert('Please fill all fields');
+      }
+    });
+
+    // Close popup when clicking outside
+    window.addEventListener('click', (event) => {
+      if (event.target === loginPopup) {
+        loginPopup.classList.add('hidden');
+      }
+    });
+
+    // Language switching (basic implementation)
+    const languageSelect = document.getElementById('language-select');
+    
+    languageSelect.addEventListener('change', () => {
+      const lang = languageSelect.value;
+      switch(lang) {
+        case 'hi':
+          document.querySelector('h1').textContent = '🌾 मार्केट मूल्य ट्रैकर';
+          document.getElementById('nearby').textContent = 'आपका निकटतम मंडी:';
+          document.getElementById('crop-title').textContent = 'मूल्य ट्रेंड देखने के लिए एक फसल का चयन करें';
+          document.getElementById('login-btn').textContent = 'साइन अप / लॉगिन';
+          break;
+        case 'mr':
+          document.querySelector('h1').textContent = '🌾 बाजार भाव ट्रॅकर';
+          document.getElementById('nearby').textContent = 'आपला निकटचा मंडी:';
+          document.getElementById('crop-title').textContent = 'किमत ट्रेंड पाहण्यासाठी एक शेतीचे निवड करा';
+          document.getElementById('login-btn').textContent = 'साइन अप / लॉगिन';
+          break;
+        default:
+          document.querySelector('h1').textContent = '🌾 Market Price Tracker';
+          document.getElementById('nearby').textContent = 'Nearby Mandi:';
+          document.getElementById('crop-title').textContent = 'Select a crop to view price trend';
+          document.getElementById('login-btn').textContent = 'Sign Up / Login';
+      }
+    });
+  </script>
+</body>
+</html>
